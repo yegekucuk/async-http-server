@@ -4,9 +4,6 @@ PORT = 9000
 
 # Basit HTML içerik
 HTML_RESPONSE = """\
-HTTP/1.1 200 OK
-Content-Type: text/html; charset=utf-8
-
 <!DOCTYPE html>
 <html>
 <head><title>HTTP Server</title></head>
@@ -17,12 +14,18 @@ Content-Type: text/html; charset=utf-8
 """
 HTML_RESPONSE = HTML_RESPONSE.encode('utf-8')
 
-# Şimdilik sadece GET destekleniyor
-METHOD_NOT_ALLOWED = """\
-HTTP/1.1 405 Method Not Allowed
-Content-Type: text/plain
-Connection: close
-
-Only GET method is supported.
-"""
-METHOD_NOT_ALLOWED = METHOD_NOT_ALLOWED.encode('utf-8')
+# HTTP durum kodları
+STATUS_MESSAGES = {
+    200: "OK",
+    201: "Created",
+    202: "Accepted",
+    204: "No Content",
+    301: "Moved Permanently",
+    302: "Found",
+    400: "Bad Request",
+    401: "Unauthorized",
+    403: "Forbidden",
+    404: "Not Found",
+    405: "Method Not Allowed",
+    500: "Internal Server Error",
+}

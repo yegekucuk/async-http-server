@@ -1,4 +1,5 @@
 from const import *
+from utils import *
 import asyncio
 import time
 import os
@@ -14,8 +15,9 @@ def parse_http(http:str):
     request_line = lines[0]
     parts = request_line.split()
     
+    # Geçersiz format
     if len(parts) != 3:
-        return None  # Geçersiz format
+        return None
     
     method, path, version = parts
     return {
@@ -29,7 +31,12 @@ async def serve_static_file(path, writer):
     file_path = path.lstrip("/")  # baştaki / karakterini kaldır
     if not os.path.isfile(file_path):
         # Dosya yoksa 404 gönder
-        response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\n404 Not Found".encode("utf-8")
+        response = generate_response(
+            400,
+            {"Content-Type": "text/plain",
+             "Connection": "close"},
+            "File not found."
+        )
         writer.write(response)
         return
 
@@ -42,11 +49,20 @@ async def serve_static_file(path, writer):
         if mime_type is None:
             mime_type = "application/octet-stream"
         # Yanıtı oluştur
-        header = f"HTTP/1.1 200 OK\r\nContent-Type: {mime_type}\r\n\r\n".encode("utf-8")
-        writer.write(header + content)
+        response = generate_response(
+            200,
+            {"Content-Type": mime_type},
+            content
+        )
+        writer.write(response)
     except Exception as e:
         print("Error while serving static file:", e)
-        response = b"HTTP/1.1 500 Internal Server Error\r\n\r\nInternal Server Error"
+        response = generate_response(
+            500,
+            {"Content-Type": "text/plain",
+             "Connection": "close"},
+            "Internal Server Error"
+        )
         writer.write(response)
 
 async def handle_client(reader, writer):
@@ -57,7 +73,12 @@ async def handle_client(reader, writer):
         parsed = parse_http(request)
         # Parse edilemiyorsa 400 dön
         if not parsed:
-            writer.write(b"HTTP/1.1 400 Bad Request\r\n\r\nBad Request")
+            writer.write(generate_response(
+                400,
+                {"Content-Type": "text/plain",
+                "Connection": "close"},
+                "Bad Request"
+            ))
             return
         print("****** Incoming request:\n", request)
         # İsteğin metodunu ve path'ini getir
@@ -65,19 +86,36 @@ async def handle_client(reader, writer):
         path = parsed["path"]
         if method != "GET":
             # GET metodu değilse izin verme
-            writer.write(b"HTTP/1.1 405 Method Not Allowed\r\n\r\nMethod Not Allowed")
+            writer.write(generate_response(
+                405,
+                {"Content-Type": "text/plain",
+                "Connection": "close"},
+                "Method Not Allowed"
+            ))
         elif path.startswith("/static/"):
             # Statikten dosyayı getir
             await serve_static_file(path, writer)
         elif path == "/":
             # Ana sayfa (HTML yanıt)
-            writer.write(HTML_RESPONSE)
+            writer.write(generate_response(
+                200,
+                {"Content-Type": "text/html; charset=utf-8"},
+                HTML_RESPONSE
+            ))
         elif path == "/api/hello":
             # API'den hello yanıtı dön
-            response = b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"message\": \"Hello from the API!\"}"
-            writer.write(response)
+            writer.write(generate_response(
+                200,
+                {"Content-Type": "application/json"},
+                '{"message":"Hello from the API!"}'
+            ))
         else:
-            writer.write(b"HTTP/1.1 404 Not Found\r\n\r\n404 Not Found")
+            writer.write(generate_response(
+                404,
+                {"Content-Type": "text/plain",
+                "Connection": "close"},
+                "404 Not Found"
+            ))
         
         await writer.drain()
     except Exception as e:
@@ -92,7 +130,7 @@ async def main():
     print(f"Async Server is on {HOST}:{PORT}")
 
     # Belirli bir süre çalıştıktan sonra sunucuyu kapat
-    runtime = 60
+    runtime = 3600
     async with server:
         start_time = time.time()
         while time.time() - start_time < runtime:
