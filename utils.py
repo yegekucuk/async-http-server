@@ -21,6 +21,10 @@ def parse_http(http:str):
         "version": version
     }
 
+def generate_json(params: dict) -> str:
+    from json import dumps
+    return dumps(params, ensure_ascii=False)
+
 def generate_response(status_code: int,
                       headers: dict | None = None,
                       body: bytes | str = b"") -> bytes:

@@ -82,11 +82,17 @@ async def handle_client(reader, writer):
                 HTML_RESPONSE
             ))
         elif path == "/api/hello":
+            json_response = generate_json(
+                {
+                    "message": "Hello from the API!",
+                    "author": "Yunus Ege Küçük"
+                }
+            )
             # API'den hello yanıtı dön
             writer.write(generate_response(
                 200,
                 {"Content-Type": "application/json"},
-                '{"message":"Hello from the API!"}'
+                json_response
             ))
         else:
             writer.write(generate_response(
