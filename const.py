@@ -1,6 +1,6 @@
 # HOST ve PORT bilgileri
-HOST = '127.0.0.1'
-PORT = 9000
+HOST = '0.0.0.0'
+PORT = 8080
 
 # Basit HTML içerik
 HTML_RESPONSE = """\
