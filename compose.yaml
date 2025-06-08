@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    container_name: http-server
+    ports:
+      - "8080:8080"
+    volumes:
+      # Host’taki static dosyaları container içindeki /app/static’e eşle
+      - ./static:/app/static:ro
