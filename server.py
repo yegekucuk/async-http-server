@@ -5,27 +5,6 @@ import time
 import os
 import mimetypes
 
-def parse_http(http:str):
-    # Satırları ayır
-    lines = http.split("\r\n")
-    if len(lines) == 0:
-        return None
-    
-    # İlk satırı al (Request-Line)
-    request_line = lines[0]
-    parts = request_line.split()
-    
-    # Geçersiz format
-    if len(parts) != 3:
-        return None
-    
-    method, path, version = parts
-    return {
-        "method": method,
-        "path": path,
-        "version": version
-    }
-
 async def serve_static_file(path, writer):
     # path örn: /static/style.css
     file_path = path.lstrip("/")  # baştaki / karakterini kaldır

@@ -1,5 +1,26 @@
 from const import *
 
+def parse_http(http:str):
+    # Satırları ayır
+    lines = http.split("\r\n")
+    if len(lines) == 0:
+        return None
+    
+    # İlk satırı al (Request-Line)
+    request_line = lines[0]
+    parts = request_line.split()
+    
+    # Geçersiz format
+    if len(parts) != 3:
+        return None
+    
+    method, path, version = parts
+    return {
+        "method": method,
+        "path": path,
+        "version": version
+    }
+
 def generate_response(status_code: int,
                       headers: dict | None = None,
                       body: bytes | str = b"") -> bytes:
